@@ -36,7 +36,7 @@ public class UserOrder {
 	@ManyToOne
 	@JoinColumn(name="user_id", nullable = false, referencedColumnName = "id")
 	@JsonProperty
-    private User user;
+    private AppUser user;
 	
 	@JsonProperty
 	@Column
@@ -58,11 +58,11 @@ public class UserOrder {
 		this.items = items;
 	}
 
-	public User getUser() {
+	public AppUser getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(AppUser user) {
 		this.user = user;
 	}
 	

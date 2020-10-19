@@ -1,6 +1,7 @@
 package com.example.demo.security;
 
 import com.auth0.jwt.JWT;
+import com.example.demo.model.persistence.AppUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,10 +31,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req,
                                                 HttpServletResponse res) throws AuthenticationException {
+        System.out.println("we aint here doe");
         try {
-            com.example.demo.model.persistence.User creds = new ObjectMapper()
-                    .readValue(req.getInputStream(), com.example.demo.model.persistence.User.class);
+            AppUser creds = new ObjectMapper()
+                    .readValue(req.getInputStream(), AppUser.class);
 
+            System.out.println("i put the nuggets in the over bc they taste so good");
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             creds.getUsername(),
@@ -51,6 +54,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
+        System.out.println("we here doe");
         String token = JWT.create()
                 .withSubject(((User) auth.getPrincipal()).getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "user")
-public class User {
+public class AppUser {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,9 +31,9 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@Column(nullable = false)
-	private String salt;
+//	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//	@Column(nullable = false)
+//	private String salt;
 
 	@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
@@ -72,12 +72,12 @@ public class User {
 		this.password = password;
 	}
 
-	public String getSalt() {
-		return salt;
-	}
-
-	public void setSalt(String salt) {
-		this.salt = salt;
-	}
+//	public String getSalt() {
+//		return salt;
+//	}
+//
+//	public void setSalt(String salt) {
+//		this.salt = salt;
+//	}
 
 }

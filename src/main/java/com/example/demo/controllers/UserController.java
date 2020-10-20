@@ -2,11 +2,14 @@ package com.example.demo.controllers;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Optional;
 
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,14 +38,21 @@ public class UserController {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@GetMapping("/id/{id}")
-	public ResponseEntity<AppUser> findById(@PathVariable Long id) {
-		return ResponseEntity.of(userRepository.findById(id));
+	public ResponseEntity<AppUser> findById(@PathVariable Long id, Authentication authentication) {
+		Optional<AppUser> optionalAppUser = Optional.ofNullable(userRepository.findById(id)).orElseThrow(RuntimeException::new);
+		if(!authentication.getName().equals(optionalAppUser.get().getUsername())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		return ResponseEntity.of(optionalAppUser);
 	}
 
 //	static final Logger log = LoggerFactory.getLogger(UserController.class);
 
 	@GetMapping("/{username}")
-	public ResponseEntity<AppUser> findByUserName(@PathVariable String username) {
+	public ResponseEntity<AppUser> findByUserName(@PathVariable String username, Authentication authentication) {
+		if(!authentication.getName().equals(username)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
 		AppUser user = userRepository.findByUsername(username);
 		return user == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(user);
 	}

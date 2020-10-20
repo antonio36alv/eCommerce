@@ -29,6 +29,7 @@ public class OrderControllerTest {
     private Authentication authentication = mock(Authentication.class);
 
     private UserOrder userOrder = mock(UserOrder.class);
+//    private UserOrder userOrder = new UserOrder();
 
     @Before
     public void setUp() {
@@ -46,7 +47,13 @@ public class OrderControllerTest {
         final ResponseEntity<UserOrder> wrongUserOrder = orderController.submit("notbobloblaw", authentication);
         // ensure we get back status code 403 - forbidden
         assertEquals(403, wrongUserOrder.getStatusCodeValue());
+
+        when(userRepository.findByUsername("bobloblaw")).thenReturn(null);
+        final ResponseEntity<UserOrder> repoUserNull = orderController.submit("bobloblaw", authentication);
+        assertEquals(404, repoUserNull.getStatusCodeValue());
         // testing when submitting order under the correct user
+        when(authentication.getName()).thenReturn("bobloblaw");
+        when(userRepository.findByUsername("bobloblaw")).thenReturn(TestUtils.mockedUser());
 //        final ResponseEntity<UserOrder> order = orderController.submit("bobloblaw", authentication);
 //        assertEquals(200, order.getStatusCodeValue());
     }
@@ -62,6 +69,7 @@ public class OrderControllerTest {
         final ResponseEntity<List<UserOrder>> orderHistory = orderController.getOrdersForUser("bobloblaw", authentication);
         assertEquals(200, orderHistory.getStatusCodeValue());
     }
+
 
 
 }

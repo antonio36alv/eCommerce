@@ -35,6 +35,7 @@ public class TestUtils {
 
     protected static AppUser mockedUser() {
         Cart cart = new Cart();
+        cart.setId(Long.valueOf(1));
         AppUser appUser = new AppUser();
         appUser.setId(1);
         appUser.setUsername("bobloblaw");
@@ -44,9 +45,12 @@ public class TestUtils {
 
     public static Cart mockedCart() {
         Cart cart = new Cart();
+        AppUser appUser = new AppUser();
+        appUser.setId(1);
+        appUser.setUsername("bobloblaw");
         cart.setId(Long.valueOf(1));
         cart.setItems(mockedItemList());
-        cart.setUser(mockedUser());
+        cart.setUser(appUser);
         return cart;
     }
 

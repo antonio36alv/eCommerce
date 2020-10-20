@@ -84,6 +84,36 @@ public class CartControllerTest {
         assertEquals(cart.getBody().getItems().get(0).getDescription(), TestUtils.mockedItem().getDescription());
     }
 
+    @Test
+    public void removeFromCartTest() {
+        // test for non-matching request username/auth. username
+        when(authentication.getName()).thenReturn("notbobloblaw");
+        ResponseEntity<Cart> wrongUsernameResponse = cartController
+                        .removeFromcart(createCartRequest("bobloblaw"), authentication);
+        assertEquals(403, wrongUsernameResponse.getStatusCodeValue());
+
+        when(userRepository.findByUsername("bobloblaw")).thenReturn(null);
+        when(authentication.getName()).thenReturn("bobloblaw");
+        ResponseEntity<Cart> nullUserResponse = cartController
+                .removeFromcart(createCartRequest("bobloblaw"), authentication);
+        assertEquals(404, nullUserResponse.getStatusCodeValue());
+
+        when(userRepository.findByUsername("bobloblaw")).thenReturn(TestUtils.mockedUser());
+        when(itemRepository.findById(Long.valueOf(1))).thenReturn(Optional.empty());
+        ResponseEntity<Cart> nullItemResponse = cartController
+                .removeFromcart(createCartRequest("bobloblaw"), authentication);
+        assertEquals(404, nullItemResponse.getStatusCodeValue());
+
+
+        when(userRepository.findByUsername("bobloblaw")).thenReturn(TestUtils.mockedUser());
+        when(authentication.getName()).thenReturn("bobloblaw");
+        when(itemRepository.findById(Long.valueOf(1))).thenReturn(Optional.of(TestUtils.mockedItem()));
+        ResponseEntity<Cart> happyPathResponse = cartController
+                .removeFromcart(createCartRequest("bobloblaw"), authentication);
+        assertEquals(200, happyPathResponse.getStatusCodeValue());
+
+    }
+
     private static ModifyCartRequest createCartRequest(String username) {
         ModifyCartRequest cartRequest = new ModifyCartRequest();
         cartRequest.setUsername(username);

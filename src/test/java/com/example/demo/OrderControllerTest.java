@@ -28,6 +28,8 @@ public class OrderControllerTest {
 
     private Authentication authentication = mock(Authentication.class);
 
+    private UserOrder userOrder = mock(UserOrder.class);
+
     @Before
     public void setUp() {
         orderController = new OrderController();
@@ -38,7 +40,8 @@ public class OrderControllerTest {
     @Test
     public void submitTest() {
         when(authentication.getName()).thenReturn("bobloblaw");
-        when(userRepository.findByUsername("bobloblaw")).thenReturn(mockedUser());
+        when(userRepository.findByUsername("bobloblaw")).thenReturn(TestUtils.mockedUser());
+//        when(userOrder.createFromCart(TestUtils.mockedCart())).thenReturn(TestUtils.mockedUserOrder());
         // test to make sure you can't submit an order under another user
         final ResponseEntity<UserOrder> wrongUserOrder = orderController.submit("notbobloblaw", authentication);
         // ensure we get back status code 403 - forbidden
@@ -51,24 +54,14 @@ public class OrderControllerTest {
     @Test
     public void getOrdersForUserTest() {
         when(authentication.getName()).thenReturn("bobloblaw");
-        when(userRepository.findByUsername("bobloblaw")).thenReturn(mockedUser());
+        when(userRepository.findByUsername("bobloblaw")).thenReturn(TestUtils.mockedUser());
         // test to make sure you can't submit an order under another user
         final ResponseEntity<List<UserOrder>> wrongUserOrderHistory = orderController.getOrdersForUser("notbobloblaw", authentication);
-        // ensure we get back status code 403 - forbidden
+        // ensure we get back stAtus code 403 - forbidden
         assertEquals(403, wrongUserOrderHistory.getStatusCodeValue());
         final ResponseEntity<List<UserOrder>> orderHistory = orderController.getOrdersForUser("bobloblaw", authentication);
         assertEquals(200, orderHistory.getStatusCodeValue());
     }
 
-    private static AppUser mockedUser() {
-        Cart cart = new Cart();
-        AppUser appUser = new AppUser();
-        appUser.setId(1);
-        appUser.setUsername("bobloblaw");
-        appUser.setCart(cart);
-//        appUser.setId(1);
-//        appUser.setId(1);
-        return appUser;
-    }
 
 }

@@ -8,7 +8,10 @@ import com.example.demo.model.requests.CreateUserRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,12 +28,47 @@ public class UserControllerTest {
 
     private BCryptPasswordEncoder encoder = mock(BCryptPasswordEncoder.class);
 
+    private Authentication authentication = mock(Authentication.class);
+
     @Before
     public void setUp() {
         userController = new UserController();
         TestUtils.injectObjects(userController, "userRepository", userRepo);
         TestUtils.injectObjects(userController, "cartRepository", cartRepository);
         TestUtils.injectObjects(userController, "bCryptPasswordEncoder", encoder);
+    }
+
+    @Test
+    public void findUserNegativeTest() {
+        when(authentication.getName()).thenReturn("bobloblaw");
+        ResponseEntity<AppUser> userByUsername = userController.findByUserName("notbobloblaw", authentication);
+        assertEquals(403, userByUsername.getStatusCodeValue());
+    }
+
+    @Test
+    public void createUserNegativeTest() {
+        CreateUserRequest r = new CreateUserRequest();
+        r.setUsername("bobloblaw");
+        r.setPassword("testPassword");
+        r.setConfirmPassword("incorrectPassword");
+
+        ResponseEntity<AppUser> failedCreateUser = userController.createUser(r);
+        assertEquals(400, failedCreateUser.getStatusCodeValue());
+    }
+
+    @Test
+    public void findUserHappyPathTest() {
+        when(authentication.getName()).thenReturn("bobloblaw");
+        when(userRepo.findById(Long.valueOf(1))).thenReturn(Optional.of(TestUtils.mockedUser()));
+        when(userRepo.findByUsername("bobloblaw")).thenReturn(TestUtils.mockedUser());
+        // test findById
+        ResponseEntity<AppUser> userById = userController.findById(Long.valueOf(1), authentication);
+        assertEquals(200, userById.getStatusCodeValue());
+        assertEquals("bobloblaw", userById.getBody().getUsername());
+        // test findByUsername
+        ResponseEntity<AppUser> userByUsername = userController.findByUserName("bobloblaw", authentication);
+        assertEquals(200, userByUsername.getStatusCodeValue());
+        assertEquals("bobloblaw",userByUsername.getBody().getUsername());
     }
 
     @Test

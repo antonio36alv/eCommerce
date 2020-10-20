@@ -4,8 +4,8 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +37,8 @@ public class UserController {
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+	static final Logger log = LoggerFactory.getLogger(UserController.class);
+
 	@GetMapping("/id/{id}")
 	public ResponseEntity<AppUser> findById(@PathVariable Long id, Authentication authentication) {
 		Optional<AppUser> optionalAppUser = Optional.ofNullable(userRepository.findById(id)).orElseThrow(RuntimeException::new);
@@ -46,7 +48,6 @@ public class UserController {
 		return ResponseEntity.of(optionalAppUser);
 	}
 
-//	static final Logger log = LoggerFactory.getLogger(UserController.class);
 
 	@GetMapping("/{username}")
 	public ResponseEntity<AppUser> findByUserName(@PathVariable String username, Authentication authentication) {
@@ -56,27 +57,42 @@ public class UserController {
 		AppUser user = userRepository.findByUsername(username);
 		return user == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(user);
 	}
-	
+
 	@PostMapping("/create")
 	public ResponseEntity<AppUser> createUser(@RequestBody CreateUserRequest createUserRequest) {
-//	    log.info("User name set with ", createUserRequest.getUsername());
+	    // init  user
 		AppUser user = new AppUser();
+		// set username
 		user.setUsername(createUserRequest.getUsername());
+		// init cart
 		Cart cart = new Cart();
+		// save cart
 		cartRepository.save(cart);
+		// set cart to user
 		user.setCart(cart);
-		SecureRandom random = new SecureRandom();
-		byte[] salt = new byte[16];
-		random.nextBytes(salt);
-		String encodedSalt = Base64.getEncoder().encodeToString(salt);
-//		user.setSalt(encodedSalt);
+		// validate password length and that confirm password matches
 		if(createUserRequest.getPassword().length() < 7 ||
 				!createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())) {
-//			log.error("Error with user password. Cannot create user {}", createUserRequest.getUsername());
+			// log warning due to password mismatch
+			log.warn("Error with user password. Cannot create user {}", createUserRequest.getUsername());
+			// return bad request
 			return ResponseEntity.badRequest().build();
 		}
-		user.setPassword(/*user.getSalt() +*/ bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
-		userRepository.save(user);
+		// after password validation set password
+		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
+		// save user and init saved user
+		AppUser savedUser = userRepository.save(user);
+		// if id comes back incorrect there was an issue saving the user
+		if(savedUser.getId() <= 0) {
+		    // therefore we will log the issue as a warning
+			log.warn("Error creating user {}", createUserRequest.getUsername());
+			// and return bad request
+			return ResponseEntity.badRequest().build();
+		} else {
+		    // otherwise we were successful in creating the new user
+			log.trace("Created user {}", createUserRequest.getUsername());
+		}
+		// finish off with returning user entity
 		return ResponseEntity.ok(user);
 	}
 	

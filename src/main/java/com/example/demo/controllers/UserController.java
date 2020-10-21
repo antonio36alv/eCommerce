@@ -1,7 +1,5 @@
 package com.example.demo.controllers;
 
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -81,17 +79,18 @@ public class UserController {
 		// after password validation set password
 		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 		// save user and init saved user
-		AppUser savedUser = userRepository.save(user);
+		userRepository.save(user);
+//		System.out.println(user.getId());
 		// if id comes back incorrect there was an issue saving the user
-		if(savedUser.getId() <= 0) {
-		    // therefore we will log the issue as a warning
-			log.warn("Error creating user {}", createUserRequest.getUsername());
-			// and return bad request
-			return ResponseEntity.badRequest().build();
-		} else {
-		    // otherwise we were successful in creating the new user
-			log.trace("Created user {}", createUserRequest.getUsername());
-		}
+//		if(user.getId() <= 0) {
+//		    // therefore we will log the issue as a warning
+//			log.warn("Error creating user {}", createUserRequest.getUsername());
+//			// and return bad request
+//			return ResponseEntity.badRequest().build();
+//		} else {
+//		    // otherwise we were successful in creating the new user
+//			log.trace("Created user {}", createUserRequest.getUsername());
+//		}
 		// finish off with returning user entity
 		return ResponseEntity.ok(user);
 	}

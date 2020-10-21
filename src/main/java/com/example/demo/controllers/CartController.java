@@ -40,11 +40,8 @@ public class CartController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 		AppUser user = userRepository.findByUsername(request.getUsername());
-		if(user == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
 		Optional<Item> item = itemRepository.findById(request.getItemId());
-		if(!item.isPresent()) {
+		if(!item.isPresent() || user == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();
@@ -61,11 +58,8 @@ public class CartController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 		AppUser user = userRepository.findByUsername(request.getUsername());
-		if(user == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
 		Optional<Item> item = itemRepository.findById(request.getItemId());
-		if(!item.isPresent()) {
+		if(!item.isPresent() || user == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();

@@ -61,7 +61,7 @@ public class OrderController {
 	@GetMapping("/history/{username}")
 	public ResponseEntity<List<UserOrder>> getOrdersForUser(@PathVariable String username, Authentication authentication) {
 		if(!authentication.getName().equals(username)) {
-			log.warn("Request parameter contained a different user than the one requested.\nAuthenticated user: {}\nUser requested for: {}", authentication.getName(), username);
+			log.warn("Request parameter contained a different user than the one requested. Authenticated user: {} User requested for: {}", authentication.getName(), username);
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 		AppUser user = userRepository.findByUsername(username);
